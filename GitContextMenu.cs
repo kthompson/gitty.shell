@@ -6,9 +6,10 @@ using System.Runtime.InteropServices;
 
 namespace Gitty.Shell
 {
-    [ExtensionFileTypes("*,Folder"),     
+    [ExtensionFileTypes("*,FirefoxHTML,Folder"),     
     Guid("79EC607E-B516-47EC-AD6E-EBE618780D58"),
     ClassInterface(ClassInterfaceType.None),
+    ProgId("Gitty.GitContextMenu"),
     ComVisible(true)]
     public class GitContextMenu : ContextMenuHandlerBase, IContextMenuHandler
     {
