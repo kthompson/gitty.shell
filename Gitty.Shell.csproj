@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30428</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{B941526C-BD89-4E03-910B-20BA5D5A7AFF}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -12,7 +12,7 @@
     <AssemblyName>Gitty.Shell</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
     <AssemblyOriginatorKeyFile>gitty.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -35,6 +35,7 @@
     <RegisterForComInterop>true</RegisterForComInterop>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Windows.Forms" />
@@ -61,7 +62,9 @@
   </Target>
   -->
   <PropertyGroup>
-    <PreBuildEvent>rem C:\Windows\Microsoft.NET\Framework\v2.0.50727\RegAsm.exe /unregister $(TargetPath)</PreBuildEvent>
-    <PostBuildEvent>C:\Windows\Microsoft.NET\Framework\v2.0.50727\RegAsm.exe $(TargetPath) /tlb:$(TargetDir)$(TargetName).tlb</PostBuildEvent>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
 </Project>

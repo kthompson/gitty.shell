@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Collections;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
+using Gitty.Shell.Com;
+using System.ComponentModel;
 
 namespace Gitty.Shell
 {
@@ -13,11 +14,12 @@ namespace Gitty.Shell
         #region " API Declarations "
 
 
-        [DllImport("shell32.dll")]
-        private static extern int DragQueryFile(IntPtr hDrop, int iFile, [Out] StringBuilder lpszFile, int cch);
+        [EditorBrowsable(EditorBrowsableState.Never), DllImport("shell32", EntryPoint = "DragQueryFileA", CharSet = CharSet.Ansi, SetLastError = true, ExactSpelling = true)]
+        private static extern int DragQueryFile(int hDrop, int iFile, StringBuilder lpszFile, int cch);
 
-        [DllImport("ole32.dll")]
-        private static extern int ReleaseStgMedium([In] ref STGMEDIUM pmedium);
+        [EditorBrowsable(EditorBrowsableState.Never), DllImport("ole32", CharSet = CharSet.Ansi, SetLastError = true, ExactSpelling = true)]
+        private static extern int ReleaseStgMedium(ref STGMEDIUM Stm);
+
 
         #endregion
 
@@ -38,14 +40,14 @@ namespace Gitty.Shell
                 int max;
                 StringBuilder file;
 
-                data.GetData(ref fmt, out stm);
+                data.GetData(ref fmt, ref stm);
 
-                max = DragQueryFile(stm.unionmember, -1, null, 0);
+                max = DragQueryFile(stm.data, -1, null, 0);
 
                 for (int i = 0; i < max; i++)
                 {
                     file = new StringBuilder(260);
-                    DragQueryFile(stm.unionmember, i, file, file.Capacity);
+                    DragQueryFile(stm.data, i, file, file.Capacity);
 
                     this.Add(file.ToString());
                 }

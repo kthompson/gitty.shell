@@ -9,9 +9,7 @@ namespace Gitty.Shell
     {
         // See the attribute guidelines at 
         //  http://go.microsoft.com/fwlink/?LinkId=85236
-        readonly string _fileTypes;
 
-        // This is a positional argument
         public ExtensionFileTypesAttribute(string fileTypes)
         {
             this.FileTypesString = fileTypes;

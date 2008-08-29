@@ -27,13 +27,12 @@ namespace Gitty.Shell
 
             // Get the ExtensionFileTypes attribute
             ExtensionFileTypesAttribute fileTypes = (ExtensionFileTypesAttribute)(attributes[0]);
-
+            key = Registry.ClassesRoot;
             foreach (string type in fileTypes.FileTypes)
             {
-                RegistryKey key2 = Registry.ClassesRoot.CreateSubKey(type + @"\shellex\" + ExtensionKey);
+                RegistryKey key2 = key.CreateSubKey(type + @"\shellex\" + ExtensionKey);
                 key2.SetValue(null, ClassId);
                 key2.Close();
-
             }
         }
 

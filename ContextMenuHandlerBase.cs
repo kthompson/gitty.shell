@@ -1,19 +1,24 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
-using System.Collections.ObjectModel;
-
-using Microsoft.Win32;
-
 using Gitty.Shell.Com;
-using System.Runtime.InteropServices.ComTypes;
+using Microsoft.Win32;
 
 
 namespace Gitty.Shell
 {
+
+    [ComVisible(true), Guid("44bfc30d-c42e-4277-a31c-af2b17cbb6d6")]
+    public interface IContextMenuHandler
+    {
+        [DispId(1)]
+        string OnMenuSelected(MenuItem Item);
+    }
+
     public abstract class ContextMenuHandlerBase : IContextMenu, IShellExtInit
     {
         ContextMenu _menu =  new ContextMenu();
@@ -40,48 +45,50 @@ namespace Gitty.Shell
             MF_POPUP = 0x10,
         }
 
-        [DllImport("user32", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern bool InsertMenu(IntPtr hmenu, int position, MenuFlags flags, int item_id, [MarshalAs(UnmanagedType.LPTStr)]string item_text);
+        [EditorBrowsable(EditorBrowsableState.Never), DllImport("User32", EntryPoint = "InsertMenuA", CharSet = CharSet.Ansi, SetLastError = true, ExactSpelling = true)]
+        private static extern long InsertMenu(IntPtr hMenu, int nPosition, MenuFlags wFlags, int wIDNewItem, [MarshalAs(UnmanagedType.VBByRefStr)] ref string lpNewItem);
+    
 
-        [DllImport("user32.dll")]
+        [EditorBrowsable(EditorBrowsableState.Never), DllImport("User32", CharSet = CharSet.Ansi, SetLastError = true, ExactSpelling = true)]
         private static extern IntPtr CreatePopupMenu();
 
 
-        private void AddItems(MenuItem.MenuItemCollection items, IntPtr hMenu, int index, int cmd)
+
+        private void AddItems(Menu.MenuItemCollection items, IntPtr hMenu, int index, ref int cmdId)
         {
             foreach (MenuItem menu in items)
             {
+                string text = menu.Text;
                 if (menu.IsParent)
                 {
                     IntPtr popMenu = CreatePopupMenu();
-
-                    InsertMenu(hMenu, index, MenuFlags.MF_BYPOSITION | MenuFlags.MF_POPUP, popMenu.ToInt32(), menu.Text);
-                    AddItems(menu.MenuItems, popMenu, 0, cmd);
+                    InsertMenu(hMenu, index, MenuFlags.MF_BYPOSITION | MenuFlags.MF_POPUP, popMenu.ToInt32(), ref text);
+                    AddItems(menu.MenuItems, popMenu, 0, ref cmdId);
                 }
                 else
                 {
-                    InsertMenu(hMenu, index, MenuFlags.MF_BYPOSITION, cmd, menu.Text);
-                    cmd++;
+                    InsertMenu(hMenu, index, MenuFlags.MF_BYPOSITION, cmdId, ref text);
+                    cmdId++;
                 }
                 index++;
             }
         }
 
-        private MenuItem FindMenu(MenuItem.MenuItemCollection items, int id, int cmd)
+        private MenuItem FindMenu(Menu.MenuItemCollection items, int id, ref int cmdId)
         {
             foreach (MenuItem menu in items)
             {
                 if (menu.IsParent)
                 {
-                    MenuItem ret = FindMenu(menu.MenuItems, id, cmd);
+                    MenuItem ret = FindMenu(menu.MenuItems, id, ref cmdId);
                     if (ret != null)
                         return ret;
                 }
                 else
                 {
-                    if (cmd == id)
+                    if (cmdId == id)
                         return menu;
-                    cmd++;
+                    cmdId++;
                 }
             }
             return null;
@@ -107,27 +114,26 @@ namespace Gitty.Shell
 
         #region IContextMenu Members
 
-        int IContextMenu.QueryContextMenu(IntPtr hmenu, int iMenu, int idCmdFirst, int idCmdLast, QueryContextMenuFlags uFlags)
+        int IContextMenu.QueryContextMenu(IntPtr hmenu, int indexMenu, int idCmdFirst, int idCmdLast, QueryContextMenuFlags uFlags)
         {
-            MessageBox.Show("IContextMenu.QueryContextMenu");
             int firstID = idCmdFirst;
 
             // Add the items to the shell context menu
-            AddItems(_menu.MenuItems, hmenu, iMenu, idCmdFirst);
+            AddItems(_menu.MenuItems, hmenu, indexMenu, ref idCmdFirst);
 
             // Return how many items were added
             return idCmdFirst - firstID;
         }
 
-        void IContextMenu.InvokeCommand(IntPtr ipici)
+        void IContextMenu.InvokeCommand(ref CMINVOKECOMMANDINFO pici)
         {
-            CMINVOKECOMMANDINFO pici = (CMINVOKECOMMANDINFO)Marshal.PtrToStructure(ipici, typeof(CMINVOKECOMMANDINFO));
-            MessageBox.Show("IContextMenu.InvokeCommand");
+            int zeroRef = 0;
             //Find the MenuItem object
-            MenuItem item = FindMenu(_menu.MenuItems, pici.lpVerb.ToInt32(), 0);
+            MenuItem item = FindMenu(_menu.MenuItems, pici.lpVerb.ToInt32(), ref zeroRef);
 
             // Call the Click event
-            item.PerformClick();
+            if(item!=null)
+                item.PerformClick();
 
             // Release the Files collection
             this.Files = null;
@@ -140,11 +146,10 @@ namespace Gitty.Shell
 
         void IContextMenu.GetCommandString(int idcmd, GetCommandStringFlags uflags, int reserved, IntPtr pszName, int cch)
         {
-            MessageBox.Show("IContextMenu.GetCommandString");
             if ((uflags & GetCommandStringFlags.GCS_HELPTEXT) == GetCommandStringFlags.GCS_HELPTEXT)
             {
-
-                string text = this.OnMenuSelected(FindMenu(_menu.MenuItems, idcmd, 0)) + '\0';
+                int zeroRef = 0;
+                string text = this.OnMenuSelected(FindMenu(_menu.MenuItems, idcmd, ref zeroRef)) + '\0';
 
                 if (text.Length < cch)
                     cch = text.Length;
@@ -163,11 +168,9 @@ namespace Gitty.Shell
 
         #region IShellExtInit Members
 
-        int IShellExtInit.Initialize(int pidlFolder, System.Runtime.InteropServices.ComTypes.IDataObject lpdobj, int hKeyProgID)
+        void IShellExtInit.Initialize(int pidlFolder, Gitty.Shell.Com.IDataObject lpIDataObject, int hkeyProgID)
         {
-            MessageBox.Show("IShellExtInit.Initialize");
-            this.Files = new FileNameCollection(lpdobj).AsReadOnly();
-            return 0;
+            this.Files = new FileNameCollection(lpIDataObject).AsReadOnly();            
         }
 
         #endregion
