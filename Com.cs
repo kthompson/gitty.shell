@@ -90,6 +90,8 @@ namespace Gitty.Shell.Com
         void Initialize(int pidlFolder, [MarshalAs(UnmanagedType.Interface)] IDataObject lpIDataObject, int hkeyProgID);
     }
 
+
+
     #region IDataObject
     [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIUnknown), Guid("0000010e-0000-0000-C000-000000000046"), EditorBrowsable(EditorBrowsableState.Never)]
     internal interface IDataObject
