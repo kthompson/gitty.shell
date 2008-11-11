@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text;
 using System.Collections;
 using System.Runtime.InteropServices;
-using Gitty.Shell.Com;
 using System.ComponentModel;
 
 namespace Gitty.Shell

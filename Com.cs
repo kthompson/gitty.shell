@@ -4,10 +4,55 @@ using System.Text;
 using System.Windows.Forms;
 using System.ComponentModel;
 
-namespace Gitty.Shell.Com
+namespace Gitty.Shell
 {
 
-    #region IContextMenu
+    [ComImport, Guid("0C6C4200-C589-11D0-999A-00C04FD655E1"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    internal interface x68b0aa936d40bad2
+    {
+        [PreserveSig]
+        int x2ace4480301ba06c([MarshalAs(UnmanagedType.LPWStr)] string xa31bc830851248f5, [MarshalAs(UnmanagedType.U4)] int x37122af4efc25ea2);
+        [PreserveSig]
+        int xbd2501623e4874d2(IntPtr xafe2f3653ee64ebc, int xfcffe10b2208dfca, out int xf9de607638860fdb, out uint x896ecbff45ecd055);
+        [PreserveSig]
+        int x411547f8fa9c8b64(out int xc0ccccf0a590fcb4);
+    }
+
+    [Flags]
+    internal enum ISIOI
+    {
+        ISIOI_ICONFILE = 1,
+        ISIOI_ICONINDEX = 2
+    }
+
+    
+
+    [ComVisible(false)]
+    [ComImport]
+    [Guid("0C6C4200-C589-11D0-999A-00C04FD655E1")]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    internal interface IShellIconOverlayIdentifier
+    {
+
+        [PreserveSig]
+        int IsMemberOf(
+            [MarshalAs(UnmanagedType.LPWStr)] string path,
+            [MarshalAs(UnmanagedType.U4)] int attributes);
+
+        [PreserveSig]
+        int GetOverlayInfo(
+            [MarshalAs(UnmanagedType.LPWStr)] out string iconFileBuffer,
+            int iconFileBufferSize,
+            out int iconIndex,
+            [MarshalAs(UnmanagedType.U4)] out ISIOI flags);
+
+        [PreserveSig]
+        int GetPriority(
+            out int priority);
+
+    }
+
+
     [ComImport, Guid("000214E4-0000-0000-C000-000000000046"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), EditorBrowsable(EditorBrowsableState.Never)]
     internal interface IContextMenu
     {
@@ -40,13 +85,6 @@ namespace Gitty.Shell.Com
         CMF_VERBSONLY = 2
     }
 
- 
-
-
-
-    
-
-
     [StructLayout(LayoutKind.Sequential), EditorBrowsable(EditorBrowsableState.Never)]
     internal struct CMINVOKECOMMANDINFO
     {
@@ -75,24 +113,12 @@ namespace Gitty.Shell.Com
         CMIC_MASK_UNICODE = 0x4000
     }
 
- 
-
-
- 
-
-    #endregion
-
-
-
     [ComImport, Guid("000214E8-0000-0000-C000-000000000046"), EditorBrowsable(EditorBrowsableState.Never), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     internal interface IShellExtInit
     {
         void Initialize(int pidlFolder, [MarshalAs(UnmanagedType.Interface)] IDataObject lpIDataObject, int hkeyProgID);
     }
 
-
-
-    #region IDataObject
     [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIUnknown), Guid("0000010e-0000-0000-C000-000000000046"), EditorBrowsable(EditorBrowsableState.Never)]
     internal interface IDataObject
     {
@@ -157,9 +183,4 @@ namespace Gitty.Shell.Com
         [MarshalAs(UnmanagedType.IUnknown)]
         public object pUnkForRelease;
     }
-
-    #endregion
-
-
-
 }

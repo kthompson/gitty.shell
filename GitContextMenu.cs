@@ -17,22 +17,14 @@ namespace Gitty.Shell
         // Methods
         public GitContextMenu()
         {
-            this.MenuItems.Add("-");
-            this.MenuItems.Add("Create &Playlist...", new EventHandler(this.CreatePlaylist));
-            Menu.MenuItemCollection submenu = this.MenuItems.Add("Hi Pals").MenuItems;
-            this.MenuItems.Add("-");
+            var submenu = MenuItems.Add("Git").MenuItems;
             int i = 0;
             do
             {
-                submenu.Add("Menu #" + i.ToString(), new EventHandler(this.CreatePlaylist2));
+                submenu.Add("Menu #" + i, CreatePlaylist2);
                 i++;
             }
             while (i <= 5);            
-        }
-
-        private void CreatePlaylist(object sender, EventArgs e)
-        {
-            MessageBox.Show("Create a playlist");
         }
 
         private void CreatePlaylist2(object sender, EventArgs e)
@@ -42,7 +34,7 @@ namespace Gitty.Shell
 
         public override string OnMenuSelected(MenuItem Item)
         {
-            return "Creates a playlist with the selected files";
+            return "Select a git command";
         }
 
         

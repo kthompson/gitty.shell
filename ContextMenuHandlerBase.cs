@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
-using Gitty.Shell.Com;
-using Microsoft.Win32;
 
 
 namespace Gitty.Shell
@@ -20,12 +17,9 @@ namespace Gitty.Shell
         private FileNameCollection m_Files;
 
         // Methods
-        protected ContextMenuHandlerBase()
-        {
-        }
 
         [EditorBrowsable(EditorBrowsableState.Never)]
-        private void AddItems(Menu.MenuItemCollection items, IntPtr hMenu, int index, ref int cmdId)
+        private static void AddItems(Menu.MenuItemCollection items, IntPtr hMenu, int index, ref int cmdId)
         {
             foreach (MenuItem menu in items)
             {
@@ -34,7 +28,7 @@ namespace Gitty.Shell
                 {
                     IntPtr popMenu = CreatePopupMenu();
                     InsertMenu(hMenu, index, MenuFlags.MF_BYPOSITION | MenuFlags.MF_POPUP, popMenu.ToInt32(), ref menuText);
-                    this.AddItems(menu.MenuItems, popMenu, 0, ref cmdId);
+                    AddItems(menu.MenuItems, popMenu, 0, ref cmdId);
                 }
                 else
                 {
@@ -66,14 +60,14 @@ namespace Gitty.Shell
         [EditorBrowsable(EditorBrowsableState.Never), DllImport("User32", CharSet = CharSet.Ansi, SetLastError = true, ExactSpelling = true)]
         private static extern IntPtr CreatePopupMenu();
         [EditorBrowsable(EditorBrowsableState.Never)]
-        private MenuItem FindMenu(Menu.MenuItemCollection items, int id, ref int cmdId)
+        private static MenuItem FindMenu(Menu.MenuItemCollection items, int id, ref int cmdId)
         {
             MenuItem findMenu = null;
             foreach (MenuItem menu in items)
             {
                 if (menu.IsParent)
                 {
-                    findMenu = this.FindMenu(menu.MenuItems, id, ref cmdId);
+                    findMenu = FindMenu(menu.MenuItems, id, ref cmdId);
                     if (findMenu != null)
                         return findMenu;
                 }
@@ -90,29 +84,23 @@ namespace Gitty.Shell
         [EditorBrowsable(EditorBrowsableState.Never)]
         void IContextMenu.GetCommandString(int idCmd, GetCommandStringFlags uType, int pwReserved, IntPtr pszName, int cchMax)
         {
-            if ((uType & GetCommandStringFlags.GCS_HELPTEXT) == GetCommandStringFlags.GCS_HELPTEXT)
-            {
-                int S0 = 0;
-                string text = this.OnMenuSelected(this.FindMenu(this.m_CtxMenu.MenuItems, idCmd, ref S0)) + "\0";
-                if (text.Length < cchMax)
-                {
-                    cchMax = text.Length;
-                }
-                if ((uType & GetCommandStringFlags.GCS_UNICODE) == GetCommandStringFlags.GCS_UNICODE)
-                {
-                    Marshal.Copy(text.ToCharArray(), 0, pszName, cchMax);
-                }
-                else
-                {
-                    Marshal.Copy(Encoding.ASCII.GetBytes(text), 0, pszName, cchMax);
-                }
-            }
+            if ((uType & GetCommandStringFlags.GCS_HELPTEXT) != GetCommandStringFlags.GCS_HELPTEXT) return;
+
+            int S0 = 0;
+            string text = OnMenuSelected(FindMenu(m_CtxMenu.MenuItems, idCmd, ref S0)) + "\0";
+            if (text.Length < cchMax)
+                cchMax = text.Length;
+
+            if ((uType & GetCommandStringFlags.GCS_UNICODE) == GetCommandStringFlags.GCS_UNICODE)
+                Marshal.Copy(text.ToCharArray(), 0, pszName, cchMax);
+            else
+                Marshal.Copy(Encoding.ASCII.GetBytes(text), 0, pszName, cchMax);
         }
 
         [EditorBrowsable(EditorBrowsableState.Never)]
-        void IShellExtInit.Initialize(int pidlFolder, Gitty.Shell.Com.IDataObject lpIDataObject, int hkeyProgID)
+        void IShellExtInit.Initialize(int pidlFolder, IDataObject lpIDataObject, int hkeyProgID)
         {
-            this.m_Files = new FileNameCollection(lpIDataObject);
+            m_Files = new FileNameCollection(lpIDataObject);
         }
 
         [EditorBrowsable(EditorBrowsableState.Never), DllImport("User32", EntryPoint = "InsertMenuA", CharSet = CharSet.Ansi, SetLastError = true, ExactSpelling = true)]
@@ -121,10 +109,10 @@ namespace Gitty.Shell
         void IContextMenu.InvokeCommand(ref CMINVOKECOMMANDINFO lpici)
         {
             int S0 = 0;
-            this.FindMenu(this.m_CtxMenu.MenuItems, lpici.lpVerb.ToInt32(), ref S0).PerformClick();
-            this.m_Files = null;
-            this.m_CtxMenu.Dispose();
-            this.m_CtxMenu = null;
+            FindMenu(m_CtxMenu.MenuItems, lpici.lpVerb.ToInt32(), ref S0).PerformClick();
+            m_Files = null;
+            m_CtxMenu.Dispose();
+            m_CtxMenu = null;
         }
 
         public virtual string OnMenuSelected(MenuItem item)
@@ -136,7 +124,7 @@ namespace Gitty.Shell
         int IContextMenu.QueryContextMenu(IntPtr hMenu, int indexMenu, int idCmdFirst, int idCmdLast, QueryContextMenuFlags uFlags)
         {
             int firstID = idCmdFirst;
-            this.AddItems(this.m_CtxMenu.MenuItems, hMenu, indexMenu, ref idCmdFirst);
+            AddItems(m_CtxMenu.MenuItems, hMenu, indexMenu, ref idCmdFirst);
             return (idCmdFirst - firstID);
         }
 
@@ -145,7 +133,7 @@ namespace Gitty.Shell
         {
             get
             {
-                return this.m_Files.AsReadOnly();
+                return m_Files.AsReadOnly();
             }
         }
 
@@ -153,7 +141,7 @@ namespace Gitty.Shell
         {
             get
             {
-                return this.m_CtxMenu.MenuItems;
+                return m_CtxMenu.MenuItems;
             }
         }
 
