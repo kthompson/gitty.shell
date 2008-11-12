@@ -39,6 +39,7 @@
     </DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="LogicNP.EZShellExtensions, Version=3.0.0.0, Culture=neutral, PublicKeyToken=748d50477e8bfbe0" />
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>

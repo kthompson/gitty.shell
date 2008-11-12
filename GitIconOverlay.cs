@@ -1,28 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace Gitty.Shell
 {
-    [Guid("babfc129-05eb-4643-a2a9-cd648a5ea13c"), ComVisible(true), ClassInterface(ClassInterfaceType.AutoDispatch)]
-    public class GitIconOverlay : IconOverlayBase
+    [Guid("babfc129-05eb-4643-a2a9-cd648a5ea13c"), ComVisible(true), ClassInterface(ClassInterfaceType.None)]
+    public class GitIconOverlay : IconOverlayBase, _IconOverlayBase
     {
-        protected override bool OnDisplayOverlayIcon(DisplayOverlayArgs e)
+        public GitIconOverlay()
+            : base(@"c:\projects\Gitty\Gitty.Shell\icon1.ico")
         {
-            return Path.GetExtension(e.Path) == ".dll";
+            
         }
 
-        protected override void OnSelectOverlay(SelectOverlayArgs e)
+        public override bool OnDisplayOverlayIcon(DisplayOverlayArgs e)
         {
-            e.IconFile = @"C:\projects\Gitty\Gitty.Shell\icon1.ico";
+            return true;
         }
 
-        protected override int OnPriority()
+        public override int OnPriority()
         {
-            return 0;
+            return 99;
         }
     }
+
+
 }

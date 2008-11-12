@@ -21,7 +21,6 @@ namespace Gitty.Shell
 
                 // Unregister the class as an approved extensoin
                 var key = Registry.LocalMachine.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved", true);
-                MessageBox.Show(string.Format("Setting {0} = {1}",ClassId, t.Name));
                 key.SetValue(ClassId, t.Name, RegistryValueKind.String);
 
                 key.Close();

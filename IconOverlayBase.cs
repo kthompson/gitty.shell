@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Windows.Forms;
 using Microsoft.Win32;
 
 namespace Gitty.Shell
@@ -10,21 +11,11 @@ namespace Gitty.Shell
     [ComVisible(false)]
     public abstract class IconOverlayBase : IShellIconOverlayIdentifier
     {
-        public class SelectOverlayArgs : CancelEventArgs
-        {
-            public SelectOverlayArgs()
-            {
-            }
-
-            public SelectOverlayArgs(string file, int index)
-            {
-                IconFile = file;
-                IconIndex = index;
-            }
-
-            public string IconFile { get; set; }
-            public int IconIndex { get; set; }
-        }
+        private const int S_OK = 0;
+        private const int S_FALSE = 1;
+        private const int E_FAIL = 0;
+        public string IconFile { get; set; }
+        public int IconIndex { get; set; }
 
         public class DisplayOverlayArgs : EventArgs
         {
@@ -38,16 +29,23 @@ namespace Gitty.Shell
             public int FileAttributes { get; private set; }
         }
 
-        protected virtual void OnSelectOverlay(SelectOverlayArgs e)
+        protected IconOverlayBase(string file)
+            : this(file, 0)
         {
+            
+        }
+        protected IconOverlayBase(string file, int index)
+        {
+            IconFile = file;
+            IconIndex = index;
         }
 
-        protected virtual int OnPriority()
+        public virtual int OnPriority()
         {
             return 0;
         }
 
-        protected virtual bool OnDisplayOverlayIcon(DisplayOverlayArgs e)
+        public virtual bool OnDisplayOverlayIcon(DisplayOverlayArgs e)
         {
             return false;
         }
@@ -77,30 +75,44 @@ namespace Gitty.Shell
 
         int IShellIconOverlayIdentifier.IsMemberOf(string path, int attributes)
         {
-            return OnDisplayOverlayIcon(new DisplayOverlayArgs(path,attributes)) ? 0 : 1;
+            return OnDisplayOverlayIcon(new DisplayOverlayArgs(path,attributes)) ? S_OK : S_FALSE;
         }
 
-        int IShellIconOverlayIdentifier.GetOverlayInfo(out string iconFileBuffer, int iconFileBufferSize, out int iconIndex, out ISIOI flags)
+        void IShellIconOverlayIdentifier.GetOverlayInfo(IntPtr iconFileBuffer, int iconFileBufferSize, out int iconIndex, out ISIOI flags)
         {
-            var e = new SelectOverlayArgs();
-
-            OnSelectOverlay(e);
-
             flags = ISIOI.ISIOI_ICONFILE | ISIOI.ISIOI_ICONINDEX;
-            iconIndex = e.IconIndex;
-            iconFileBuffer = e.IconFile;
-            
-            return e.Cancel ? 1 : 0;
+            iconIndex = IconIndex;
+            WriteToIntPtr(IconFile, iconFileBuffer, iconFileBufferSize * 2);
         }
 
-        int IShellIconOverlayIdentifier.GetPriority(out int priority)
+        void IShellIconOverlayIdentifier.GetPriority(out int priority)
         {
             priority = OnPriority(); // 0-100 (0 is highest priority)
-            return 0; // S_OK
         }
 
         #endregion
+
+        internal static void WriteToIntPtr(string value, IntPtr destination, int bufferSize)
+        {
+            byte[] bytes = Encoding.Unicode.GetBytes(value);
+            int length = bytes.Length;
+            if ((length + 2) > bufferSize)
+            {
+                length = bufferSize - 2;
+            }
+            Marshal.Copy(bytes, 0, destination, length);
+            Marshal.WriteByte(destination, length, 0);
+            Marshal.WriteByte(destination, length + 1, 0);
+        }
     }
-    
- 
+
+    [ComVisible(true), Guid("A901546F-10A8-4ECE-BB25-414343D0C005")]
+    public interface _IconOverlayBase
+    {
+        [DispId(1)]
+        int OnPriority();
+        [DispId(2)]
+        bool OnDisplayOverlayIcon(IconOverlayBase.DisplayOverlayArgs e);
+
+    }
 }

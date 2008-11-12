@@ -39,15 +39,14 @@ namespace Gitty.Shell
             [MarshalAs(UnmanagedType.LPWStr)] string path,
             [MarshalAs(UnmanagedType.U4)] int attributes);
 
-        [PreserveSig]
-        int GetOverlayInfo(
-            [MarshalAs(UnmanagedType.LPWStr)] out string iconFileBuffer,
+        void GetOverlayInfo(
+            IntPtr iconFileBuffer,
             int iconFileBufferSize,
             out int iconIndex,
             [MarshalAs(UnmanagedType.U4)] out ISIOI flags);
 
-        [PreserveSig]
-        int GetPriority(
+        
+        void GetPriority(
             out int priority);
 
     }
