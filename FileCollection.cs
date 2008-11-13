@@ -25,10 +25,9 @@ namespace Gitty.Shell
         #region " Constructors "
 
         public FileNameCollection(IDataObject data)
-            : base()
         {
-            FORMATETC fmt = new FORMATETC();
-            STGMEDIUM stm = new STGMEDIUM();
+            var fmt = new FORMATETC();
+            var stm = new STGMEDIUM();
 
             fmt.cfFormat = 15;//CF_HDROP
             fmt.tymed = TYMED.TYMED_HGLOBAL;
@@ -36,19 +35,18 @@ namespace Gitty.Shell
 
             try
             {
-                int max;
                 StringBuilder file;
 
                 data.GetData(ref fmt, ref stm);
 
-                max = DragQueryFile(stm.data, -1, null, 0);
+                int max = DragQueryFile(stm.data, -1, null, 0);
 
                 for (int i = 0; i < max; i++)
                 {
                     file = new StringBuilder(260);
                     DragQueryFile(stm.data, i, file, file.Capacity);
 
-                    this.Add(file.ToString());
+                    Add(file.ToString());
                 }
 
             }
@@ -66,7 +64,7 @@ namespace Gitty.Shell
 
         void IDisposable.Dispose()
         {
-            this.Clear();
+            Clear();
             GC.SuppressFinalize(this);
         }
 

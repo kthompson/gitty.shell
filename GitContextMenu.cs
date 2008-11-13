@@ -9,43 +9,36 @@ using System.IO;
 namespace Gitty.Shell
 {
 
-    [Guid("79EC607E-B516-47EC-AD6E-EBE618780D58"), 
-     ExtensionFileTypes("*,txtfile,Directory,Drive,Folder,InternetShortcut,lnkfile"),
-     ClassInterface(ClassInterfaceType.None)]
-    public class GitContextMenu : ContextMenuHandlerBase, _GitContextMenu
+    [ComVisible(true), Guid("79EC607E-B516-47EC-AD6E-EBE618780D58"), ExtensionFileTypes("*,txtfile,Directory,Drive,Folder,InternetShortcut,lnkfile")]
+    public class GitContextMenu : ContextMenuHandlerBase//, _GitContextMenu
     {
-        // Methods
+        public GitContext Context { get; private set; }
+
         public GitContextMenu()
         {
-            var submenu = MenuItems.Add("Git").MenuItems;
-            int i = 0;
-            do
-            {
-                submenu.Add("Menu #" + i, CreatePlaylist2);
-                i++;
-            }
-            while (i <= 5);            
+            MenuItems.Add("-", OnClick);
+            MenuItems.Add("Git", OnClick);
         }
 
-        private void CreatePlaylist2(object sender, EventArgs e)
+        protected override void OnInitialize()
         {
-            MessageBox.Show("Hi Pals");
+            //setup context
+            //Context = Git.Open().GetContext();
         }
 
-        public override string OnMenuSelected(MenuItem Item)
+        protected void OnClick(object sender, EventArgs e)
         {
-            return "Select a git command";
+            MessageBox.Show("Click");
         }
-
-        
+     
     }
 
-    // Nested Types
-    [ComVisible(true), Guid("8F449365-A47C-41a2-A2FC-96929FC56EFA")]
-    public interface _GitContextMenu
-    {
-        [DispId(1)]
-        string OnMenuSelected(MenuItem Item);
-    }
+    //// Nested Types
+    //[ComVisible(true), Guid("8F449365-A47C-41a2-A2FC-96929FC56EFA")]
+    //public interface _GitContextMenu
+    //{
+    //    [DispId(1)]
+    //    string OnMenuSelected(MenuItem Item);
+    //}
 
 }

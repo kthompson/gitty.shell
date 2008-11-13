@@ -101,6 +101,7 @@ namespace Gitty.Shell
         void IShellExtInit.Initialize(int pidlFolder, IDataObject lpIDataObject, int hkeyProgID)
         {
             m_Files = new FileNameCollection(lpIDataObject);
+            OnInitialize();
         }
 
         [EditorBrowsable(EditorBrowsableState.Never), DllImport("User32", EntryPoint = "InsertMenuA", CharSet = CharSet.Ansi, SetLastError = true, ExactSpelling = true)]
@@ -113,6 +114,10 @@ namespace Gitty.Shell
             m_Files = null;
             m_CtxMenu.Dispose();
             m_CtxMenu = null;
+        }
+
+        protected virtual void OnInitialize()
+        {
         }
 
         public virtual string OnMenuSelected(MenuItem item)
