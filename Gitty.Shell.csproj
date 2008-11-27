@@ -65,6 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="gitty.snk" />
+    <None Include="unregister.cmd" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Gitty\Gitty.csproj">
